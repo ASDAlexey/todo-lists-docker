@@ -99,7 +99,7 @@ server {
 
     $(replaceEndSlash)
 
-    root /var/www/html/${PATH_FRONTEND}/build;
+    root /var/www/html/${PATH_FRONTEND}/dist;
 
     location / {
         $(spaLocation)
