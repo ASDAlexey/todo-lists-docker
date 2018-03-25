@@ -22,11 +22,11 @@ clone:
 	@bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'local' ]; then make clone-all; fi"
 	@bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'server' ] && [ ${CLUSTER} == 'self' ]; then make clone-all; fi"
 clone-all:
-	@echo "\n\033[1;mCloning (${BRANCH_NODE} branch from backend repository) \033[0m"
-	@bash -c "if cd src/${PATH_FRONTEND} 2> /dev/null; then git pull origin ${BRANCH_FRONTEND}; else git clone -b ${BRANCH_FRONTEND} ${GIT_NODE} src/${PATH_FRONTEND}; fi"
+	@echo "\n\033[1;mCloning (${BRANCH_FRONTEND} branch from frontend repository) \033[0m"
+	@bash -c "if cd src/${PATH_FRONTEND} 2> /dev/null; then git pull origin ${BRANCH_FRONTEND}; else git clone -b ${BRANCH_FRONTEND} ${GIT_FRONTEND} src/${PATH_FRONTEND}; fi"
 clone-frontend:
-	@echo "\n\033[1;mCloning (${BRANCH_NODE} branch from backend repository) \033[0m"
-	@bash -c "if cd src/${PATH_FRONTEND} 2> /dev/null; then git pull origin ${BRANCH_FRONTEND}; else git clone -b ${BRANCH_FRONTEND} ${GIT_NODE} src/${PATH_FRONTEND}; fi"
+	@echo "\n\033[1;mCloning (${BRANCH_NODE} branch from frontend repository) \033[0m"
+	@bash -c "if cd src/${PATH_FRONTEND} 2> /dev/null; then git pull origin ${BRANCH_FRONTEND}; else git clone -b ${BRANCH_FRONTEND} ${GIT_FRONTEND} src/${PATH_FRONTEND}; fi"
 clone-docker: clean-docker-repo-force
 	@bash -c "git pull"
 

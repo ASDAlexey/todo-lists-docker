@@ -31,7 +31,7 @@ function generateListenSSL {
 
 function assets {
     if [ ${COMPOSE_ENVIRONMENT} == 'local' ]; then
-        root=/var/www/html/${PATH_FRONTEND}/build;
+        root=/var/www/html/${PATH_FRONTEND}/dist;
     else
         root=/var/www/html/${PATH_FRONTEND};
     fi
