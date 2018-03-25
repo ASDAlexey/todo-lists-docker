@@ -10,48 +10,20 @@ WARNING=\033[37;1;41m	#  ${WARNING}
 
 EXEC = docker-compose -p ${COMPOSE_PROJECT_NAME} -f docker-compose-local.yml exec
 
-.PHONY: help docker-env clone rebuild build-frontend up stop restart status clean clean-docker-repo clean-frontend-repo clean-backend-repo console-nginx console-node console-elasticsearch console-kibana console-logstash logs-nginx logs-node logs-elasticsearch logs-kibana logs-logstash generate-nginx-config generate-httpauth generate-ssl generate-configs generate-elk-configs hosts warning
-
-db-update-user-password:
-	@bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'local' ]; then make db-update-user-password-local; fi"
-	@bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'server' ] && [ ${CLUSTER} == 'self' ]; then make db-update-user-password-self; fi"
-db-update-user-password-local:
-	@docker-compose -p ${COMPOSE_PROJECT_NAME} -f docker-compose-local.yml exec db psql -Upostgres -c "ALTER USER postgres WITH PASSWORD '${POSTGRES_PASSWORD}';"
-db-update-user-password-self:
-	@docker-compose -p ${COMPOSE_PROJECT_NAME} -f docker-env-server-self.yml exec db psql -Upostgres -c "ALTER USER postgres WITH PASSWORD '${POSTGRES_PASSWORD}';"
-
-db-create:
-	@bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'local' ]; then make db-drop db-create-local; fi"
-	@bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'server' ] && [ ${CLUSTER} == 'self' ]; then make db-drop db-create-self; fi"
-db-create-local:
-	@docker-compose -p ${COMPOSE_PROJECT_NAME} -f docker-compose-local.yml exec db bash -c "psql -Upostgres -c 'CREATE DATABASE ${POSTGRES_DB};'"
-db-create-self:
-	@docker-compose -p ${COMPOSE_PROJECT_NAME} -f docker-env-server-self.yml exec db bash -c "psql -Upostgres -c 'CREATE DATABASE ${POSTGRES_DB};'"
-
-db-drop:
-	@bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'local' ]; then make db-drop-local; fi"
-	@bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'server' ] && [ ${CLUSTER} == 'self' ]; then make db-drop-self; fi"
-db-drop-local:
-	@docker-compose -p ${COMPOSE_PROJECT_NAME} -f docker-compose-local.yml exec db bash -c "psql -Upostgres -c 'DROP DATABASE IF EXISTS ${POSTGRES_DB};'"
-db-drop-self:
-	@docker-compose -p ${COMPOSE_PROJECT_NAME} -f docker-env-server-self.yml exec db bash -c "psql -Upostgres -c 'DROP DATABASE IF EXISTS ${POSTGRES_DB};'"
+.PHONY: help docker-env clone rebuild build-frontend up stop restart status clean clean-docker-repo clean-frontend-repo console-nginx logs-nginx generate-nginx-config generate-httpauth generate-ssl hosts warning
 
 docker-env:
 	@bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'local' ]; then make docker-env-local; fi"
 	@bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'server' ] && [ ${CLUSTER} == 'self' ]; then make docker-env-server-self; fi"
-docker-env-local: clone generate-httpauth generate-nginx-config generate-ssl generate-configs db-create up hosts
-docker-env-server-self: clone generate-nginx-config generate-configs db-create up
+docker-env-local: clone generate-httpauth generate-nginx-config generate-ssl up hosts
+docker-env-server-self: clone generate-httpauth generate-nginx-config up
 
 clone:
 	@bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'local' ]; then make clone-all; fi"
 	@bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'server' ] && [ ${CLUSTER} == 'self' ]; then make clone-all; fi"
 clone-all:
 	@echo "\n\033[1;mCloning (${BRANCH_NODE} branch from backend repository) \033[0m"
-	@bash -c "if cd src/${PATH_NODE} 2> /dev/null; then git pull origin ${BRANCH_NODE}; else git clone -b ${BRANCH_NODE} ${GIT_NODE} src/${PATH_NODE}; fi"
 	@bash -c "if cd src/${PATH_FRONTEND} 2> /dev/null; then git pull origin ${BRANCH_FRONTEND}; else git clone -b ${BRANCH_FRONTEND} ${GIT_NODE} src/${PATH_FRONTEND}; fi"
-clone-backend:
-	@echo "\n\033[1;mCloning (${BRANCH_NODE} branch from backend repository) \033[0m"
-	@bash -c "if cd src/${PATH_NODE} 2> /dev/null; then git pull origin ${BRANCH_NODE}; else git clone -b ${BRANCH_NODE} ${GIT_NODE} src/${PATH_NODE}; fi"
 clone-frontend:
 	@echo "\n\033[1;mCloning (${BRANCH_NODE} branch from backend repository) \033[0m"
 	@bash -c "if cd src/${PATH_FRONTEND} 2> /dev/null; then git pull origin ${BRANCH_FRONTEND}; else git clone -b ${BRANCH_FRONTEND} ${GIT_NODE} src/${PATH_FRONTEND}; fi"
@@ -73,7 +45,6 @@ up:
 	@bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'local' ]; then make up-local; fi"
 	@bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'server' ] && [ ${CLUSTER} == 'self' ]; then make up-server-self; fi"
 	@bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'server' ] && [ ${CLUSTER} == 'frontend' ]; then make up-server-frontend; fi"
-	@bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'server' ] && [ ${CLUSTER} == 'backend' ]; then make up-server-backend; fi"
 	@$(MAKE) --no-print-directory status
 up-local:
 	@echo "- COMPOSE_ENVIRONMENT: ${COMPOSE_ENVIRONMENT}"
@@ -90,7 +61,6 @@ stop:
 	@bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'local' ]; then make stop-local; fi"
 	@bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'server' ] && [ ${CLUSTER} == 'self' ]; then make stop-server-self; fi"
 	@bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'server' ] && [ ${CLUSTER} == 'frontend' ]; then make stop-server-frontend; fi"
-	@bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'server' ] && [ ${CLUSTER} == 'backend' ]; then make stop-server-backend; fi"
 	@$(MAKE) --no-print-directory status
 stop-local:
 	@docker-compose -p ${COMPOSE_PROJECT_NAME} -f docker-compose-local.yml stop
@@ -124,7 +94,6 @@ status:
 	@bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'local' ]; then make status-local; fi"
 	@bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'server' ] && [ ${CLUSTER} == 'self' ]; then make status-server-self; fi"
 	@bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'server' ] && [ ${CLUSTER} == 'frontend' ]; then make status-server-frontend; fi"
-	@bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'server' ] && [ ${CLUSTER} == 'backend' ]; then make status-server-backend; fi"
 	@echo "\n\033[1;mNetwork information \033[0m"
 	@bash ./bin/network-status.sh
 status-local:
@@ -138,7 +107,6 @@ clean:
 	@bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'local' ]; then make clean-local; fi"
 	@bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'server' ] && [ ${CLUSTER} == 'self' ]; then make clean-server-self; fi"
 	@bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'server' ] && [ ${CLUSTER} == 'frontend' ]; then make clean-server-frontend; fi"
-	@bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'server' ] && [ ${CLUSTER} == 'backend' ]; then make clean-server-backend; fi"
 clean-local:
 	@bash -c "while true; do bash ./bin/dialog.sh || break; docker-compose -p ${COMPOSE_PROJECT_NAME} -f ./docker-compose-local.yml down --rmi all 2> /dev/null; git reset --hard; rm -rf ./src/*; break; done"
 clean-server-self:
@@ -157,22 +125,6 @@ console-nginx-local:
 console-nginx-server-self:
 	@docker-compose -p ${COMPOSE_PROJECT_NAME} -f docker-compose-server-self.yml exec nginx sh
 
-console-node:
-	@bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'local' ]; then make console-node-local; fi"
-	@bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'server' ] && [ ${CLUSTER} == 'self' ]; then make console-node-server-self; fi"
-console-node-local:
-	@docker-compose -p ${COMPOSE_PROJECT_NAME} -f docker-compose-local.yml exec node bash
-console-node-server-self:
-	@docker-compose -p ${COMPOSE_PROJECT_NAME} -f docker-compose-server-self.yml exec node bash
-
-console-pg:
-	@bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'local' ]; then make console-pg-local; fi"
-	@bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'server' ] && [ ${CLUSTER} == 'self' ]; then make console-pg-server-self; fi"
-console-pg-local:
-	@docker-compose -p ${COMPOSE_PROJECT_NAME} -f docker-compose-local.yml exec db bash
-console-pg-server-self:
-	@docker-compose -p ${COMPOSE_PROJECT_NAME} -f docker-compose-server-self.yml exec db bash
-
 logs-nginx:
 	@bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'local' ]; then make logs-nginx-local; fi"
 	@bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'server' ] && [ ${CLUSTER} == 'self' ]; then make logs-nginx-server-self; fi"
@@ -180,22 +132,6 @@ logs-nginx-local:
 	@docker-compose -p ${COMPOSE_PROJECT_NAME} -f docker-compose-local.yml logs --tail=100 -f nginx
 logs-nginx-server-self:
 	@docker-compose -p ${COMPOSE_PROJECT_NAME} -f docker-compose-server-self.yml logs --tail=100 -f nginx
-
-logs-node:
-	@bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'local' ]; then make logs-node-local; fi"
-	@bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'server' ] && [ ${CLUSTER} == 'self' ]; then make logs-node-server-self; fi"
-logs-node-local:
-	@docker-compose -p ${COMPOSE_PROJECT_NAME} -f docker-compose-local.yml logs --tail=100 -f node
-logs-node-server-self:
-	@docker-compose -p ${COMPOSE_PROJECT_NAME} -f docker-compose-server-self.yml logs --tail=100 -f node
-
-logs-pg:
-    @bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'local' ]; then make logs-pg-local; fi"
-    @bash -c "if [ ${COMPOSE_ENVIRONMENT} == 'server' ] && [ ${CLUSTER} == 'self' ]; then make logs-pg-server-self; fi"
-logs-pg-local:
-    @docker-compose -p ${COMPOSE_PROJECT_NAME} -f docker-compose-local.yml logs --tail=100 -f db
-logs-pg-server-self:
-    @docker-compose -p ${COMPOSE_PROJECT_NAME} -f docker-compose-server-self.yml logs --tail=100 -f db
 
 generate-nginx-config:
 	@bash ./bin/nginx-config.sh

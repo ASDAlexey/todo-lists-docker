@@ -3,7 +3,7 @@
 mkdir -p nginx/configs/conf.d
 rm -rf ./nginx/configs/conf.d/*
 
-domains="$URL_FRONTEND www.$URL_FRONTEND $URL_NODE www.$URL_NODE";
+domains="$URL_FRONTEND www.$URL_FRONTEND";
 redirect_path="https://\$mod_host\$url_without_slash\$mod_args"
 
 function replaceEndSlash(){
@@ -27,21 +27,6 @@ function generateListenSSL {
     echo "    ssl_certificate /etc/nginx/ssl/ssl.cert;"
     echo "    ssl_certificate_key /etc/nginx/ssl/ssl.key;"
     fi
-}
-
-function nodeLocation {
-read -r -d '' str <<- EOM
-    proxy_pass http://node;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-        proxy_set_header Accept-Encoding "";
-        proxy_set_header Proxy "";
-        add_header 'Cache-Control' 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0';
-        expires off;
-EOM
-echo "$str"
 }
 
 function assets {
@@ -123,26 +108,6 @@ server {
     $(assets)
 }
 EOF
-
-cat <<EOF > nginx/configs/conf.d/${URL_NODE}.conf
-upstream node {
-    server node:3000;
-}
-
-server {
-    $(generateListenSSL 443)
-
-    server_name ${URL_NODE};
-
-    $(basic cache)
-
-    root /var/www/html/${PATH_NODE};
-
-    location / {
-        $(nodeLocation)
-    }
-}
-EOF
 fi
 
 if [ ${COMPOSE_ENVIRONMENT} == 'server' ] && [ ${CLUSTER} == 'self' ]; then
@@ -161,26 +126,6 @@ server {
     }
 
     $(assets)
-}
-EOF
-
-cat <<EOF > nginx/configs/conf.d/${URL_NODE}.conf
-upstream node {
-    server node:3000;
-}
-
-server {
-    $(generateListenSSL 80)
-
-    server_name ${URL_NODE};
-
-    $(basic cache)
-
-    root /var/www/html/${PATH_NODE};
-
-    location / {
-        $(nodeLocation)
-    }
 }
 EOF
 fi

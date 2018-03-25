@@ -14,8 +14,8 @@ Deployment steps
 
 ```
 git clone \
-git@bitbucket.org:sportdiary/sportdiary-docker.git sportdiary-docker \
-&& cd sportdiary-docker
+git@github.com:ASDAlexey/todo-lists-docker.git todo-lists-docker \
+&& cd todo-lists-docker
 ```
 
  * create .env file from dist: `cp .env.dist .env` 
@@ -33,7 +33,7 @@ make help
 ```
 
 
- * Your app available here [https://bee-inboind.local](https://api.sportdiary.local)
+ * Your app available here [https://todo-lists.local](https://api.sportdiary.local)
  
  
  # Change remote origin 
@@ -45,8 +45,7 @@ make help
 sudo certbot certonly --standalone -d sportdiary.com -d www.sportdiary.com -d api.sportdiary.com -d www.sportdiary.com
 
 ### Rebuild docker container node in the file docker-compose-local.yml
-docker-compose -f docker-compose-local.yml up -d --no-deps --build node
-docker-compose -f docker-compose-local.yml up -d --no-deps --build postgres
+docker-compose -f docker-compose-local.yml up -d --no-deps --build nginx
 
 ### Stop all docker containers
 docker stop $(docker ps -a -q)

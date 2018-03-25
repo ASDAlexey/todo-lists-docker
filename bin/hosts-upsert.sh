@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # insert/update hosts entry
-host_name="127.0.0.1 localhost ${URL_FRONTEND} www.${URL_FRONTEND} ${URL_NODE} www.${URL_NODE}"
+host_name="127.0.0.1 localhost ${URL_FRONTEND} www.${URL_FRONTEND}"
 
 # find existing instances in the host file and save the line numbers
 matches_in_hosts="$(grep -n "${host_name}" /etc/hosts | cut -f1 -d:)"

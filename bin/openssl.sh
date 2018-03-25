@@ -3,7 +3,7 @@
 mkdir -p nginx/ssl
 rm -rf ./nginx/ssl/*
 
-SUBJECT="/C=RU/ST=RND/L=Taganrog/O=Sportdiary=${URL_REACT_APP}"
+SUBJECT="/C=RU/ST=RND/L=Taganrog/O=Todo=${URL_FRONTEND}"
 
 # Generating ROOT pem files
 openssl req -x509 -new -nodes -newkey rsa:2048 -keyout ./nginx/ssl/server_rootCA.key -sha256 -days 1024 -out ./nginx/ssl/server_rootCA.pem -subj "${SUBJECT}" 2> /dev/null
@@ -17,9 +17,7 @@ subjectAltName = @alt_names
 
 [alt_names]
 DNS.1 = ${URL_FRONTEND}
-DNS.2 = ${URL_NODE}
-DNS.3 = www.${URL_FRONTEND}
-DNS.4 = www.${URL_NODE}
+DNS.2 = www.${URL_FRONTEND}
 EOF
 echo " - Generating SSL key file"
 openssl req -new -newkey rsa:2048 -sha256 -nodes -newkey rsa:2048 -keyout ./nginx/ssl/ssl.key -subj "${SUBJECT}" -out ./nginx/ssl/server_rootCA.csr 2> /dev/null
