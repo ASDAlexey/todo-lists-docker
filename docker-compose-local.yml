@@ -1,0 +1,39 @@
+version: '2'
+services:
+  db:
+    image: postgres:10.3-alpine
+    volumes:
+      - ./postgres/dump/:/docker-entrypoint-initdb.d/
+    ports:
+      - ${DB_PORT}:5432
+    environment:
+      POSTGRES_USER: alex
+      POSTGRES_PASSWORD: 121314
+      POSTGRES_DB: aaa
+
+  node:
+      container_name: ${COMPOSE_PROJECT_NAME}_node
+      build: ./images/node-backend
+      working_dir: /var/www/html/${PATH_NODE}
+      volumes:
+        - ./src/${PATH_NODE}:/var/www/html/${PATH_NODE}
+        - ./configs:/var/www/html/${PATH_NODE}/server/configs
+        - ./bin/wait-for-it.sh:/var/www/html/wait-for-it.sh
+      command: bash -c "npm ci; bash /var/www/html/wait-for-it.sh --host=db --port=5432 --timeout=60 -- npm run serve:${ENVIRONMENT}"
+      depends_on:
+        - db
+  nginx:
+      container_name: ${COMPOSE_PROJECT_NAME}_nginx
+      build: ./images/nginx
+      ports:
+        - ${WEB_SRV_PORT}:80
+        - ${WEB_SRV_PORT_SSL}:443
+      volumes:
+        - ./nginx/configs/conf.d/:/etc/nginx/conf.d/
+        - ./nginx/configs/nginx.conf:/etc/nginx/nginx.conf
+        - ./nginx/configs/.htpasswd:/etc/nginx/.htpasswd
+        - ./nginx/ssl/:/etc/nginx/ssl/
+        - ./src/${PATH_NODE}/:/var/www/html/${PATH_NODE}/
+        - ./src/${PATH_FRONTEND}/:/var/www/html/${PATH_FRONTEND}/
+      volumes_from:
+        - node
