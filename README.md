@@ -38,7 +38,7 @@ make help
  
  # Change remote origin 
  ```
- git remote set-url origin git@bitbucket.org:...git
+ git remote set-url origin git@github.com:...git
  ```
  
 ### [Update ssl on dev server](https://certbot.eff.org/all-instructions/#ubuntu-16-10-yakkety-nginx)
