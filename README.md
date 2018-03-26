@@ -49,3 +49,6 @@ docker-compose -f docker-compose-local.yml up -d --no-deps --build nginx
 
 ### Stop all docker containers
 docker stop $(docker ps -a -q)
+
+### Add global proxy nginx config
+sudo cp -i ./nginx/bee-inbound-dev.conf /etc/nginx/conf.d/
