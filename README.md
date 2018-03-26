@@ -33,7 +33,7 @@ make help
 ```
 
 
- * Your app available here [https://todo-lists.local](https://api.sportdiary.local)
+ * Your app available here [https://todo-lists.local](https://todo-lists.local)
  
  
  # Change remote origin 
@@ -42,7 +42,7 @@ make help
  ```
  
 ### [Update ssl on dev server](https://certbot.eff.org/all-instructions/#ubuntu-16-10-yakkety-nginx)
-sudo certbot certonly --standalone -d sportdiary.com -d www.sportdiary.com -d api.sportdiary.com -d www.sportdiary.com
+sudo certbot certonly --standalone -d asdalexey.info -d www.asdalexey.info
 
 ### Rebuild docker container node in the file docker-compose-local.yml
 docker-compose -f docker-compose-local.yml up -d --no-deps --build nginx
